@@ -1,0 +1,34 @@
+receivers:
+  otlp:
+    protocols:
+      grpc: # on port 4317
+      http: # on port 4318
+       endpoint: "0.0.0.0:4318"
+       cors:
+        allowed_origins:
+        - http://localhost:8081
+processors:
+  batch:
+    timeout: 10s
+
+exporters:
+  logging:
+    loglevel: debug
+  datadog/api:
+    service: myservice
+    version: myversion
+    api:
+      key: "19c84d441d7d82a7df222ac123c9fb31"
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging,datadog/api]
